@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="split-screen-container">
+    <!-- Left Side: Hero Section -->
+    <div class="split-left">
+        <div class="hero-content">
+            <h1 class="hero-title">Reduce Your Carbon Footprint</h1>
+            <p class="hero-subtitle">Track, analyze, and minimize your environmental impact with CarbonTrack.</p>
+            <div class="hero-actions">
+                <a href="{{ url_for('add_emission') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Start Tracking
+                </a>
+                <a href="{{ url_for('reports') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-chart-line me-2"></i>View Insights
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: Metrics and Facts -->
+    <div class="split-right">
+        <div class="metrics-container">
+            <div class="emission-counter">
+                <div class="emission-icon">
+                    <i class="fas fa-cloud"></i>
+                </div>
+                <div class="emission-details">
+                    <h3>Total CO₂ Emissions</h3>
+                    <div class="emission-value">
+                        <span class="amount">{{ total_emissions }}</span>
+                        <span class="unit">kg</span>
+                    </div>
+                    <p class="emission-subtitle">Your current carbon footprint</p>
+                </div>
+            </div>
+
+            <div class="quick-facts">
+                <h4 class="facts-title">Environmental Insights</h4>
+                <div class="fact-card">
+                    <i class="fas fa-lightbulb fact-icon"></i>
+                    <h5>Did You Know?</h5>
+                    <p>The average person creates about 4 tons of CO₂ per year.</p>
+                </div>
+                <div class="fact-card">
+                    <i class="fas fa-tree fact-icon"></i>
+                    <h5>Carbon Offset</h5>
+                    <p>One tree can absorb about 25kg of CO₂ per year.</p>
+                </div>
+                <div class="fact-card">
+                    <i class="fas fa-recycle fact-icon"></i>
+                    <h5>Reduce Impact</h5>
+                    <p>Recycling can reduce your carbon footprint by up to 2.5%.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

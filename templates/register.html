@@ -1,0 +1,190 @@
+{% extends "base.html" %} {% block content %}
+<div class="card shadow-sm border-0 mb-4">
+  <div class="card-header bg-success bg-gradient text-white">
+    <h3 class="mb-0"><i class="fas fa-user-plus me-2"></i>Create Account</h3>
+  </div>
+  <div class="card-body p-4">
+    <form method="POST" class="needs-validation" novalidate>
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          <i class="fas fa-envelope me-2"></i>Email Address
+        </label>
+        <input
+          type="email"
+          class="form-control"
+          id="email"
+          name="email"
+          required
+          placeholder="Enter your email"
+        />
+        <div class="invalid-feedback">
+          Please provide a valid email address.
+        </div>
+        <small class="form-text text-muted"
+          >We'll never share your email with anyone else.</small
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          <i class="fas fa-lock me-2"></i>Password
+        </label>
+        <div class="input-group">
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+            placeholder="Create a password"
+            pattern=".{8,}"
+            title="Password must be at least 8 characters"
+          />
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            id="togglePassword"
+          >
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        <div class="invalid-feedback">
+          Password must be at least 8 characters.
+        </div>
+        <small class="form-text text-muted"
+          >Use at least 8 characters with a mix of letters, numbers &
+          symbols.</small
+        >
+      </div>
+
+      <div class="mb-3">
+        <label for="confirmPassword" class="form-label">
+          <i class="fas fa-lock me-2"></i>Confirm Password
+        </label>
+        <input
+          type="password"
+          class="form-control"
+          id="confirmPassword"
+          required
+          placeholder="Confirm your password"
+        />
+        <div class="invalid-feedback">Passwords do not match.</div>
+      </div>
+
+      <div class="mb-3">
+        <label for="user_type" class="form-label">
+          <i class="fas fa-users me-2"></i>Account Type
+        </label>
+        <select class="form-select" id="user_type" name="user_type" required>
+          <option value="">Select account type</option>
+          <option value="individual">Individual</option>
+          <option value="industry">Industry</option>
+        </select>
+        <div class="invalid-feedback">Please select an account type.</div>
+      </div>
+
+      <div class="mb-3" id="companyNameField" style="display: none">
+        <label for="company_name" class="form-label">
+          <i class="fas fa-building me-2"></i>Company Name
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          id="company_name"
+          name="company_name"
+          placeholder="Enter company name"
+        />
+      </div>
+
+      <div class="mb-3 form-check">
+        <input type="checkbox" class="form-check-input" id="terms" required />
+        <label class="form-check-label" for="terms">
+          I agree to the
+          <a href="#" class="text-success">Terms of Service</a> and
+          <a href="#" class="text-success">Privacy Policy</a>
+        </label>
+        <div class="invalid-feedback">
+          You must agree to our terms before registering.
+        </div>
+      </div>
+
+      <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-success btn-lg">
+          <i class="fas fa-user-plus me-2"></i>Create Account
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="card-footer bg-light py-3">
+    <div class="text-center">
+      <p class="mb-0">
+        Already have an account?
+        <a href="{{ url_for('login') }}" class="text-success">Login here</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  document
+    .getElementById("togglePassword")
+    .addEventListener("click", function () {
+      const passwordInput = document.getElementById("password");
+      const icon = this.querySelector("i");
+
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+      }
+    });
+
+  // Password confirmation validation
+  const password = document.getElementById("password");
+  const confirmPassword = document.getElementById("confirmPassword");
+
+  function validatePassword() {
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setCustomValidity("Passwords don't match");
+    } else {
+      confirmPassword.setCustomValidity("");
+    }
+  }
+
+  password.addEventListener("change", validatePassword);
+  confirmPassword.addEventListener("keyup", validatePassword);
+
+  // Form validation
+  (function () {
+    "use strict";
+    const forms = document.querySelectorAll(".needs-validation");
+    Array.from(forms).forEach((form) => {
+      form.addEventListener(
+        "submit",
+        (event) => {
+          if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add("was-validated");
+        },
+        false
+      );
+    });
+  })();
+  const userTypeSelect = document.getElementById("user_type");
+  const companyField = document.getElementById("companyNameField");
+
+  userTypeSelect.addEventListener("change", function () {
+    if (this.value === "industry") {
+      companyField.style.display = "block";
+    } else {
+      companyField.style.display = "none";
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="reports-container">
+    <div class="content-header">
+        <h2><i class="fas fa-chart-line me-2"></i>Emission Reports</h2>
+        <p class="subtitle">Analyze your carbon footprint by category and time period</p>
+    </div>
+    
+    <div class="row">
+        <!-- Category Report -->
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header-custom">
+                    <h4><i class="fas fa-tags me-2"></i>Emissions by Category</h4>
+                </div>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Emissions (kg)</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set total = 0 %}
+                            {% for _, amount in by_category %}
+                                {% set total = total + amount %}
+                            {% endfor %}
+                            
+                            {% for category, amount in by_category %}
+                            <tr>
+                                <td>
+                                    <span class="category-badge {{ category|lower }}">{{ category }}</span>
+                                </td>
+                                <td>{{ "%.2f"|format(amount) }}</td>
+                                <td>
+                                    {% if total > 0 %}
+                                        {{ "%.1f"|format((amount / total) * 100) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Monthly Report -->
+        <div class="col-md-6">
+            <div class="content-card">
+                <div class="card-header-custom">
+                    <h4><i class="fas fa-calendar-alt me-2"></i>Emissions by Month</h4>
+                </div>
+                <div class="chart-container">
+                    <canvas id="monthlyChart"></canvas>
+                </div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Total Emissions (kg)</th>
+                                <th>Trend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for month, amount in by_month %}
+                            <tr>
+                                <td>{{ month }}</td>
+                                <td>{{ "%.2f"|format(amount) }}</td>
+                                <td>
+                                    {% if not loop.first and amount > by_month[loop.index0-1][1] %}
+                                        <span class="text-danger"><i class="fas fa-arrow-up"></i> Increased</span>
+                                    {% elif not loop.first and amount < by_month[loop.index0-1][1] %}
+                                        <span class="text-success"><i class="fas fa-arrow-down"></i> Decreased</span>
+                                    {% else %}
+                                        <span class="text-secondary"><i class="fas fa-minus"></i> Baseline</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Summary Card -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="content-card">
+                <div class="card-header-custom">
+                    <h4><i class="fas fa-info-circle me-2"></i>Emission Summary</h4>
+                </div>
+                <div class="row p-3">
+                    <div class="col-md-4">
+                        <div class="summary-stat">
+                            <div class="stat-label">Total Emissions</div>
+                            <div class="stat-value">
+                                {% set total_all = 0 %}
+                                {% for _, amount in by_category %}
+                                    {% set total_all = total_all + amount %}
+                                {% endfor %}
+                                {{ "%.2f"|format(total_all) }} kg
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-stat">
+                            <div class="stat-label">Highest Category</div>
+                            <div class="stat-value">
+                                {% set highest_cat = '' %}
+                                {% set highest_amount = 0 %}
+                                {% for category, amount in by_category %}
+                                    {% if amount > highest_amount %}
+                                        {% set highest_cat = category %}
+                                        {% set highest_amount = amount %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if highest_cat %}
+                                    {{ highest_cat }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="summary-stat">
+                            <div class="stat-label">Number of Records</div>
+                            <div class="stat-value">
+                                {{ by_category|length }} categories, {{ by_month|length }} months
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Category Chart
+    const categoryData = {
+        labels: [{% for category, _ in by_category %}'{{ category }}',{% endfor %}],
+        datasets: [{
+            label: 'Emissions by Category (kg)',
+            data: [{% for _, amount in by_category %}{{ amount }},{% endfor %}],
+            backgroundColor: [
+                'rgba(153, 102, 255, 0.7)', // Manufacturing
+                'rgba(75, 192, 192, 0.7)',  // Waste
+                'rgba(255, 159, 64, 0.7)',
+                'rgba(255, 99, 132, 0.7)',
+                'rgba(54, 162, 235, 0.7)',
+                'rgba(255, 206, 86, 0.7)'
+            ],
+            borderColor: [
+                'rgba(153, 102, 255, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+        }]
+    };
+
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    new Chart(categoryCtx, {
+        type: 'doughnut',
+        data: categoryData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false, // Allow custom height
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 10
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `${tooltipItem.label}: ${tooltipItem.raw} kg`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Chart remains unchanged
+    const monthlyData = {
+        labels: [{% for month, _ in by_month %}'{{ month }}',{% endfor %}],
+        datasets: [{
+            label: 'Monthly Emissions (kg)',
+            data: [{% for _, amount in by_month %}{{ amount }},{% endfor %}],
+            backgroundColor: 'rgba(76, 175, 80, 0.5)',
+            borderColor: 'rgba(76, 175, 80, 1)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true
+        }]
+    };
+
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: monthlyData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
