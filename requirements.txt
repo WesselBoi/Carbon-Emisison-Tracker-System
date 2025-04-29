@@ -1,3 +1,16 @@
-flask
-flask-sqlalchemy
-python-dotenv
+# Core
+Flask==2.3.2
+Flask-SQLAlchemy==3.0.5
+Flask-Login==0.6.2
+python-dotenv==1.0.0
+
+# Password Reset
+Flask-Mail==0.9.1
+pyotp==2.8.0
+secrets==1.0.0  # Part of Python stdlib (included for clarity)
+
+# Database Migrations (if using Flask-Migrate)
+Flask-Migrate==4.0.4
+
+# Security
+Werkzeug==2.3.6  # Contains password hashing utilities
