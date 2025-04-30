@@ -32,25 +32,14 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.root_path, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
-
-
-
 # Mail configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER')   # Your Gmail address
-app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASS')   # App password (not your regular Gmail password)
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL_USER')   
+app.config['MAIL_PASSWORD'] = os.getenv('EMAIL_PASS')   
 
 mail = Mail(app)
-
-
-
-
-
-
-
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
@@ -109,11 +98,6 @@ def index():
     else:
         return render_template('individual_dashboard.html', emissions=user_emissions)
 
-
-
-
-
-
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -122,8 +106,6 @@ def forgot_password():
         if user:
             token = generate_reset_token(email)
             reset_link = url_for('reset_password', token=token, _external=True)
-            
-            # For demo: just flash the link (in production, send via email)
             msg = Message(
                 subject='Password Reset Request',
                 sender=app.config['MAIL_USERNAME'],
@@ -147,7 +129,6 @@ def forgot_password():
         return redirect(url_for('login'))
     return render_template('forgot_password.html')
 
-
 @app.route('/reset-password/<token>', methods=['GET', 'POST'])
 def reset_password(token):
     email = verify_reset_token(token)
@@ -166,14 +147,6 @@ def reset_password(token):
     
     return render_template('reset_password.html', token=token)
 
-
-
-
-
-
-
-
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -191,6 +164,7 @@ def register():
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
+
 def login():
     if request.method == 'POST':
         user = User.query.filter_by(email=request.form['email']).first()
@@ -206,11 +180,9 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
 @app.route('/reports')
 @login_required
 def reports():
-    # Industry sees only their department breakdown
     by_category = db.session.query(
         Emission.category,
         db.func.sum(Emission.amount).label('total')
@@ -224,9 +196,6 @@ def reports():
     return render_template('reports.html', 
                          by_category=by_category,
                          by_month=by_month)
-
-
-
 
 # Emission Routes
 @app.route('/add', methods=['GET', 'POST'])
@@ -252,8 +221,6 @@ def add_emission():
     return render_template('add_emission.html', 
                          is_industry=current_user.user_type == 'industry')
 
-
-
 @app.route('/emissions')
 @login_required
 def emissions():
@@ -261,7 +228,6 @@ def emissions():
         user_id=current_user.id
     ).order_by(Emission.date.desc()).all()
     return render_template('emissions.html', emissions=user_emissions)
-
 
 @app.route('/delete/<int:id>')
 @login_required
